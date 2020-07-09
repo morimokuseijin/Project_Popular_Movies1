@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Project_Popular_Movies1</string>
+    <string name="error_message">Failed to get result. Do you have an internet connection?</string>
+</resources>
