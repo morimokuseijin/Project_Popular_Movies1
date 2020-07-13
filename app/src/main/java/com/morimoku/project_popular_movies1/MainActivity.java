@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -33,13 +34,14 @@ import java.util.Scanner;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements RecyclerAdapter.MovieOnClickHandler{
 
     private RecyclerView recyclerView;
     private RecyclerAdapter recyclerAdapter;
     String query = "popular";
     TextView errorMessage;
     ProgressBar mLoadingIndicator;
+    private Movie[] movieData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +80,27 @@ public int calculateNoOfColumns(Context context) {
         errorMessage.setVisibility(View.INVISIBLE);
         recyclerView.setVisibility(View.VISIBLE);
     }
+
+    @Override
+    public void onClick(int adapterPosition) {
+//TODO: Have to implement the activity when it was clicked
+        /*
+        Context context = this;
+        Class destinationClass = DetailActivity.class;
+
+        Intent intentToStartDetailActivity = new Intent(context, destinationClass);
+        intentToStartDetailActivity.putExtra(Intent.EXTRA_TEXT, adapterPosition);
+        intentToStartDetailActivity.putExtra("id", movieData[adapterPosition].getMovieId());
+        intentToStartDetailActivity.putExtra("title", movieData[adapterPosition].getMovieTitle());
+        intentToStartDetailActivity.putExtra("poster", movieData[adapterPosition].getMoviePosterPath());
+        intentToStartDetailActivity.putExtra("rate", movieData[adapterPosition].getMovieVoteAverage());
+        intentToStartDetailActivity.putExtra("release", movieData[adapterPosition].getMovieReleaseDate());
+        intentToStartDetailActivity.putExtra("overview", movieData[adapterPosition].getMovieOverview());
+
+        startActivity(intentToStartDetailActivity);
+        */
+    }
+
     public class FetchMovieData extends AsyncTask<String, Void, Movie[]> {
   private final String LOG_TAG = "FetchingMovieDataURL";
         final String urlImage = "http://image.tmdb.org/t/p/w185/";
@@ -87,7 +110,7 @@ public int calculateNoOfColumns(Context context) {
         private static final String VOTE_AVERAGE ="vote_average";
         private static final String OVERVIEW ="overview";
         private static final String POSTER_PATH ="poster_path";
-        private static final String RESULT = "result";
+        private static final String RESULT = "results";
         private static final String PARAM_LANGUAGE = "language";
         private static final String language = "en-US";
 
@@ -97,112 +120,38 @@ public int calculateNoOfColumns(Context context) {
           mLoadingIndicator.setVisibility(View.VISIBLE);
 }
         @Override
-        protected Movie[] doInBackground(String... strings) {
-           if (strings.length ==0){
-               return null;
-           }
-            HttpsURLConnection httpsURLConnection = null;
-            BufferedReader bufferedReader = null;
-             String moviePosterJSONStr = null;
-             String sortBy = strings[0];
+        protected Movie[] doInBackground(String... params) {
+            if (params.length == 0){
+                return null;
+            }
 
-             try {
-                 final String MOVIES_LINK = "https://api.themoviedb.org/3/movie/popular?";
-                 final String SORT_API_KEY = "api_key";
-                 final String API_KEY = "44bf7479f242490b9485b9a3ced0aa43";
+            String sortBy = params[0];
+            URL movieRequestUrl = NetworkUtils.buildUrl(sortBy);
 
-                 Uri builtUri = Uri.parse(MOVIES_LINK).buildUpon()
-                         .appendEncodedPath(sortBy)
-                         .appendQueryParameter(SORT_API_KEY,API_KEY)
-                         .appendQueryParameter(PARAM_LANGUAGE, language)
-                         .build();
+            try {
+                String jsonMovieResponse = NetworkUtils.getResponseFromHttpUrl(movieRequestUrl);
 
-                         URL url = new URL(builtUri.toString());
-                 Log.v(LOG_TAG, "Built URI " + builtUri.toString());
+                movieData
+                        = JsonUtils.MoviesJSONParse(MainActivity.this, jsonMovieResponse);
 
-                 httpsURLConnection = (HttpsURLConnection)url.openConnection();
-                 httpsURLConnection.setRequestMethod("GET");
-                 httpsURLConnection.connect();
+                return movieData;
 
-                 InputStream inputStream = httpsURLConnection.getInputStream();
-                 Scanner scanner = new Scanner(inputStream);
-                 scanner.useDelimiter("\\A");
-                 StringBuilder builder = new StringBuilder();
-                 bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                 moviePosterJSONStr = bufferedReader.toString();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
 
-
-             } catch (MalformedURLException e) {
-                 e.printStackTrace();
-             } catch (IOException e) {
-                 e.printStackTrace();
-             }finally {
-                 if (httpsURLConnection != null){
-                     httpsURLConnection.disconnect();
-                 }
-                 if (bufferedReader != null){
-                     try {
-                         bufferedReader.close();
-                     } catch (IOException e) {
-                         e.printStackTrace();
-                     }
-                 }
-                 try {
-                     return MoviesJSONParse(moviePosterJSONStr);
-                 } catch (Exception e) {
-                     e.printStackTrace();
-                 }
-             }
-
-
-            return null;
         }
 @Override
 protected void onPostExecute(Movie[] movies){
             mLoadingIndicator.setVisibility(View.INVISIBLE);
             if (movies != null){
                 showJsonDataResults();
-                /*
                 recyclerAdapter = new RecyclerAdapter(movies,MainActivity.this);
-
                 recyclerView.setAdapter(recyclerAdapter);
-                 */
+
             }
 }
-        private Movie[] MoviesJSONParse(String moviePosterJSONStr) throws JSONException {
-
-            JSONObject moviesNames = new JSONObject(moviePosterJSONStr);
-            JSONArray moviesArray = moviesNames.getJSONArray(RESULT);
-         Movie [] movieResults = new Movie[moviesArray.length()];
-
-
-            for (int i = 0; i< moviesArray.length();i++){
-                Movie movie = new Movie();
-                String id,poster_path, vote_average,overview,  release_date,title;
-                JSONObject movieObj = moviesArray.getJSONObject(i);
-                id= movieObj.optString(Id);
-                poster_path = movieObj.optString(POSTER_PATH);
-                title = movieObj.optString(ORIGINAL_TITLE);
-                release_date = movieObj.optString(RELEASE_DATE);
-                vote_average= movieObj.optString(VOTE_AVERAGE);
-                overview = movieObj.optString(OVERVIEW);
-
-
-
-                movie.setMovieId(id);
-                movie.setMoviePosterPath(urlImage + poster_path);
-                movie.setMovieTitle(title);
-                movie.setMovieReleaseDate(release_date);
-                movie.setMovieVoteAverage(vote_average);
-                movie.setMovieOverview(overview);
-
-                movieResults[i] = movie;
-
-            }
-
-                    return movieResults;
-
-            }
 
 
 
