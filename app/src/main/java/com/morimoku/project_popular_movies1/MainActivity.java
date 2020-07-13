@@ -83,8 +83,8 @@ public int calculateNoOfColumns(Context context) {
 
     @Override
     public void onClick(int adapterPosition) {
-//TODO: Have to implement the activity when it was clicked
-        /*
+
+
         Context context = this;
         Class destinationClass = DetailActivity.class;
 
@@ -98,7 +98,7 @@ public int calculateNoOfColumns(Context context) {
         intentToStartDetailActivity.putExtra("overview", movieData[adapterPosition].getMovieOverview());
 
         startActivity(intentToStartDetailActivity);
-        */
+        
     }
 
     public class FetchMovieData extends AsyncTask<String, Void, Movie[]> {
