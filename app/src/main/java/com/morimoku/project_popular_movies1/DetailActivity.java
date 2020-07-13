@@ -22,11 +22,11 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
-        mMoviePosterDisplay = (ImageView)findViewById(R.id.iv_detail_movie_poster);
-        mMovieTitleDisplay = (TextView)findViewById(R.id.tv_detail_title);
-        mMovieRateDisplay = (TextView)findViewById(R.id.tv_detail_rate);
-        mMovieReleaseDisplay  = (TextView)findViewById(R.id.tv_detail_release_date);
-        mMoviePlotSynopsisDisplay = (TextView)findViewById(R.id.tv_plot_synopsis);
+        mMoviePosterDisplay = (ImageView)findViewById(R.id.movie_poster);
+        mMovieTitleDisplay = (TextView)findViewById(R.id.detail_title);
+        mMovieRateDisplay = (TextView)findViewById(R.id.rate);
+        mMovieReleaseDisplay  = (TextView)findViewById(R.id.release_date);
+        mMoviePlotSynopsisDisplay = (TextView)findViewById(R.id.plot_synopsis);
 
 
         String poster = getIntent().getStringExtra("poster");

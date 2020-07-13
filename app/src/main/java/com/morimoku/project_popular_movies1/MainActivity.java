@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
@@ -98,9 +100,33 @@ public int calculateNoOfColumns(Context context) {
         intentToStartDetailActivity.putExtra("overview", movieData[adapterPosition].getMovieOverview());
 
         startActivity(intentToStartDetailActivity);
-        
+
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int menuItemSelected = item.getItemId();
+
+        if (menuItemSelected == R.id.action_popular) {
+            query = "popular";
+            loadMovieData();
+            return true;
+        }
+
+        if (menuItemSelected == R.id.action_top_rated) {
+            query = "top_rated";
+            loadMovieData();
+            return true;
+        }
+
+
+        return super.onOptionsItemSelected(item);
+    }
     public class FetchMovieData extends AsyncTask<String, Void, Movie[]> {
   private final String LOG_TAG = "FetchingMovieDataURL";
         final String urlImage = "http://image.tmdb.org/t/p/w185/";
